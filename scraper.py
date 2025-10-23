@@ -8,11 +8,18 @@ def scraper(url, resp):
     return [link for link in links if is_valid(link)]
 
 def extract_next_links(url, resp):
-    if not is_valid(url):
+    if resp.status != 200 or resp.raw_response is None:
         return list()
-    attached_links = []
     
-    return list()
+    try:
+        soup = BeautifulSoup(resp.raw_response, 'lxml')
+        links = set()
+        for link in soup.find_all('a', href=True):
+            links.add(str(link.get('href')))
+        return list(links)
+    except Exception as e:
+        print(f"Error parsing HTML for {url}: {e}") 
+        return list()
 
 def is_valid(url):
     # Decide whether to crawl this url or not. 
