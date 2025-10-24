@@ -1,7 +1,7 @@
 import requests 
 from bs4 import BeautifulSoup
 import re
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urljoin
 
 def scraper(url, resp):
     links = extract_next_links(url, resp)
@@ -9,17 +9,30 @@ def scraper(url, resp):
 
 def extract_next_links(url, resp):
     if resp.status != 200 or resp.raw_response is None:
-        return list()
-    
+        return []
+    html_content = None
     try:
-        soup = BeautifulSoup(resp.raw_response, 'lxml')
+        raw_bytes = resp.raw_response.content 
+        if isinstance(raw_bytes, bytes):
+            html_content = raw_bytes.decode('utf-8', errors='ignore')
+        else:
+            html_content = str(raw_bytes) 
+    except Exception as e:
+        print(f"Error accessing or decoding raw content for {url}: {e}")
+        return []
+    try:
+        soup = BeautifulSoup(html_content, 'lxml')
         links = set()
-        for link in soup.find_all('a', href=True):
-            links.add(str(link.get('href')))
+        for link_tag in soup.find_all('a', href=True):
+            href = link_tag.get('href')
+            absolute_url = urljoin(url, href) 
+            parsed_url = urlparse(absolute_url)
+            cleaned_url = parsed_url._replace(fragment='').geturl()
+            links.add(cleaned_url)
         return list(links)
     except Exception as e:
         print(f"Error parsing HTML for {url}: {e}") 
-        return list()
+        return []
 
 def is_valid(url):
     # Decide whether to crawl this url or not. 
