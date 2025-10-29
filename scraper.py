@@ -74,7 +74,7 @@ def is_valid(url):
         html_content = response.text
         
         soup = BeautifulSoup(html_content, 'html.parser')
-        if 300 < response.status_code or 200 > response.status_code:
+        if not response.raw_response or not (200 <= response.status_code <= 300):
             return False
 
         for script_or_style in soup(['script', 'style']):
@@ -97,7 +97,7 @@ def get_delay(url, user_agent='*'):
     robots_url = f'https://{domain}/robots.txt'
     response = requests.get(robots_url)
     delay = None
-    if response.status_code <= 200:
+    if  (200 <= response.status_code < 300):
         rp = RobotFileParser()
         rp.set_url(robots_url)
         rp.read()
