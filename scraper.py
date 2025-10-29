@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup
 import re
 from urllib.parse import urlparse, urljoin
+from urllib.robotparser import RobotFileParser
 import requests
 
 MAX_FILE_SIZE = 10 * 1024 * 1024
@@ -63,7 +64,7 @@ def is_valid(url):
             content_size = response.headers.get("Content-Length") #check for large size
             if 'text/html' not in content_type: #indicates NOT web page
                 return False 
-            if content_size > MAX_FILE_SIZE:
+            if content_size and int(content_size) > MAX_FILE_SIZE:
                 return False
             
             content = requests.get(url)
@@ -74,7 +75,7 @@ def is_valid(url):
             for script_or_style in soup(['script', 'style']):
                 script_or_style.decompose()
             text = soup.get_text()
-            if text < MIN_WORD_LIMIT:
+            if len(text.split()) < MIN_WORD_LIMIT:
                 return False
 
         except Exception as e:
