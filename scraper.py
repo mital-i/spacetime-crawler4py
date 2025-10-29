@@ -80,11 +80,14 @@ def is_valid(url):
 
         except Exception as e:
             print(f"Error accessing or decoding raw content for {url}: {e}")
-            return []
+            return False
+        
+        return True
 
     except TypeError:
         print ("TypeError for ", parsed)
         raise
+
 
 
     def get_delay(url, user_agent='*'):
