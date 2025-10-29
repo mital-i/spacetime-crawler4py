@@ -1,6 +1,11 @@
 from bs4 import BeautifulSoup
 import re
 from urllib.parse import urlparse, urljoin
+import requests
+
+MAX_FILE_SIZE = 10 * 1024 * 1024
+MIN_WORD_LIMIT = 20000000 
+DEFAULT_DELAY = 5
 
 def scraper(url, resp):
     links = extract_next_links(url, resp)
@@ -50,7 +55,45 @@ def is_valid(url):
             + r"|epub|dll|cnf|tgz|sha1"
             + r"|thmx|mso|arff|rtf|jar|csv"
             + r"|rm|smil|wmv|swf|wma|zip|rar|gz)$", parsed.path.lower())
+    
+        try:
+            response = requests.head(url)
+    
+            content_type = response.headers.get("Content-Type")
+            content_size = response.headers.get("Content-Length") #check for large size
+            if 'text/html' not in content_type: #indicates NOT web page
+                return False 
+            if content_size > MAX_FILE_SIZE:
+                return False
+            
+            content = requests.get(url)
+            html_content = content.text
+            
+            soup = BeautifulSoup(html_content, 'html.parser')
+
+            for script_or_style in soup(['script', 'style']):
+                script_or_style.decompose()
+            text = soup.get_text()
+            if text < MIN_WORD_LIMIT:
+                return False
+
+        except Exception as e:
+            print(f"Error accessing or decoding raw content for {url}: {e}")
+            return []
 
     except TypeError:
         print ("TypeError for ", parsed)
         raise
+
+
+    def get_delay(url, user_agent='*'):
+        domain = urlparse(url).netloc
+        robots_url = f'https://{domain}/robots.txt'
+        response = requests.get(robots_url)
+        if response.status_code <= 200:
+            rp = RobotFileParser()
+            rp.set_url(robots_url)
+            rp.read()
+            delay = rp.crawl_delay(user_agent)
+            return delay
+        return DEFAULT_DELAY
