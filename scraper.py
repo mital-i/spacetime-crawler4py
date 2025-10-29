@@ -56,48 +56,52 @@ def is_valid(url):
             + r"|epub|dll|cnf|tgz|sha1"
             + r"|thmx|mso|arff|rtf|jar|csv"
             + r"|rm|smil|wmv|swf|wma|zip|rar|gz)$", parsed.path.lower())
-    
-        try:
-            response = requests.head(url)
-    
-            content_type = response.headers.get("Content-Type")
-            content_size = response.headers.get("Content-Length") #check for large size
-            if 'text/html' not in content_type: #indicates NOT web page
-                return False 
-            if content_size and int(content_size) > MAX_FILE_SIZE:
-                return False
-            
-            content = requests.get(url)
-            html_content = content.text
-            
-            soup = BeautifulSoup(html_content, 'html.parser')
-
-            for script_or_style in soup(['script', 'style']):
-                script_or_style.decompose()
-            text = soup.get_text()
-            if len(text.split()) < MIN_WORD_LIMIT:
-                return False
-
-        except Exception as e:
-            print(f"Error accessing or decoding raw content for {url}: {e}")
-            return False
-        
-        return True
-
     except TypeError:
         print ("TypeError for ", parsed)
-        raise
+        #raise --> she wrote raise here, don't know what to do with it
+    
+    try:
+        metadata = requests.head(url)
+
+        content_type = metadata.headers.get("Content-Type")
+        content_size = metadata.headers.get("Content-Length") #check for large size
+        if 'text/html' not in content_type: #indicates NOT web page
+            return False 
+        if content_size and int(content_size) > MAX_FILE_SIZE:
+            return False
+        
+        response = requests.get(url)
+        html_content = response.text
+        
+        soup = BeautifulSoup(html_content, 'html.parser')
+        if 300 < response.status_code or 200 > response.status_code:
+            return False
+
+        for script_or_style in soup(['script', 'style']):
+            script_or_style.decompose()
+        text = soup.get_text()
+        if len(text.split()) < MIN_WORD_LIMIT: #check for valid info 
+            return False
+
+    except Exception as e:
+        print(f"Error accessing or decoding raw content for {url}: {e}")
+        return False
+    
+    return True
 
 
 
-    def get_delay(url, user_agent='*'):
-        domain = urlparse(url).netloc
-        robots_url = f'https://{domain}/robots.txt'
-        response = requests.get(robots_url)
-        if response.status_code <= 200:
-            rp = RobotFileParser()
-            rp.set_url(robots_url)
-            rp.read()
-            delay = rp.crawl_delay(user_agent)
-            return delay
-        return DEFAULT_DELAY
+
+def get_delay(url, user_agent='*'):
+    domain = urlparse(url).netloc
+    robots_url = f'https://{domain}/robots.txt'
+    response = requests.get(robots_url)
+    delay = None
+    if response.status_code <= 200:
+        rp = RobotFileParser()
+        rp.set_url(robots_url)
+        rp.read()
+        delay = rp.crawl_delay(user_agent)
+    return delay or DEFAULT_DELAY
+
+print(is_valid("https://www.cnn.com/2025/10/29/politics/maduro-cyberattack-tr"))
