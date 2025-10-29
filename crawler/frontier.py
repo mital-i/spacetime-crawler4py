@@ -1,6 +1,5 @@
 import os
 import shelve
-
 from threading import Thread, RLock
 from queue import Queue, Empty
 
