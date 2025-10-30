@@ -14,16 +14,43 @@ def scraper(url, resp):
 
     
 
+# def extract_next_links(url, resp):
+#     if resp.status != 200 or resp.raw_response is None:
+#         return []
+#     html_content = None
+#     try:
+#         raw_bytes = resp.raw_response.content 
+#         if isinstance(raw_bytes, bytes):
+#             html_content = raw_bytes.decode('utf-8', errors='ignore')
+#         else:
+#             html_content = str(raw_bytes) 
+#     except Exception as e:
+#         print(f"Error accessing or decoding raw content for {url}: {e}")
+#         return []
+#     try:
+#         soup = BeautifulSoup(html_content, 'lxml')
+#         links = set()
+#         for link_tag in soup.find_all('a', href=True):
+#             href = link_tag.get('href')
+#             absolute_url = urljoin(url, href) 
+#             parsed_url = urlparse(absolute_url)
+#             cleaned_url = parsed_url._replace(fragment='').geturl()
+#             links.add(cleaned_url)
+#         return list(links)
+#     except Exception as e:
+#         print(f"Error parsing HTML for {url}: {e}") 
+#         return []
+
 def extract_next_links(url, resp):
     if resp.status != 200 or resp.raw_response is None:
         return []
     html_content = None
     try:
-        raw_bytes = resp.raw_response.content 
+        raw_bytes = resp.raw_response.content
         if isinstance(raw_bytes, bytes):
             html_content = raw_bytes.decode('utf-8', errors='ignore')
         else:
-            html_content = str(raw_bytes) 
+            html_content = str(raw_bytes)
     except Exception as e:
         print(f"Error accessing or decoding raw content for {url}: {e}")
         return []
@@ -32,15 +59,15 @@ def extract_next_links(url, resp):
         links = set()
         for link_tag in soup.find_all('a', href=True):
             href = link_tag.get('href')
-            absolute_url = urljoin(url, href) 
+            absolute_url = urljoin(url, href)
             parsed_url = urlparse(absolute_url)
             cleaned_url = parsed_url._replace(fragment='').geturl()
-            links.add(cleaned_url)
+            if is_valid(cleaned_url):
+                links.add(cleaned_url)
         return list(links)
     except Exception as e:
-        print(f"Error parsing HTML for {url}: {e}") 
+        print(f"Error parsing HTML for {url}: {e}")
         return []
-
 def is_valid(url):
     # Decide whether to crawl this url or not. 
     # If you decide to crawl it, return True; otherwise return False.
