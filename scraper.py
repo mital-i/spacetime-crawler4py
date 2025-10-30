@@ -1,4 +1,3 @@
-
 from bs4 import BeautifulSoup
 import re
 from urllib.parse import urlparse, urljoin
@@ -12,18 +11,16 @@ def scraper(url, resp):
     links = extract_next_links(url, resp)
     return [link for link in links if is_valid(link)]
 
-    
-
 # def extract_next_links(url, resp):
 #     if resp.status != 200 or resp.raw_response is None:
 #         return []
 #     html_content = None
 #     try:
-#         raw_bytes = resp.raw_response.content 
+#         raw_bytes = resp.raw_response.content
 #         if isinstance(raw_bytes, bytes):
 #             html_content = raw_bytes.decode('utf-8', errors='ignore')
 #         else:
-#             html_content = str(raw_bytes) 
+#             html_content = str(raw_bytes)
 #     except Exception as e:
 #         print(f"Error accessing or decoding raw content for {url}: {e}")
 #         return []
@@ -32,14 +29,15 @@ def scraper(url, resp):
 #         links = set()
 #         for link_tag in soup.find_all('a', href=True):
 #             href = link_tag.get('href')
-#             absolute_url = urljoin(url, href) 
+#             absolute_url = urljoin(url, href)
 #             parsed_url = urlparse(absolute_url)
 #             cleaned_url = parsed_url._replace(fragment='').geturl()
 #             links.add(cleaned_url)
 #         return list(links)
 #     except Exception as e:
-#         print(f"Error parsing HTML for {url}: {e}") 
+#         print(f"Error parsing HTML for {url}: {e}")
 #         return []
+
 
 def extract_next_links(url, resp):
     if resp.status != 200 or resp.raw_response is None:
@@ -69,21 +67,21 @@ def extract_next_links(url, resp):
         print(f"Error parsing HTML for {url}: {e}")
         return []
 def is_valid(url):
-    # Decide whether to crawl this url or not. 
+    # Decide whether to crawl this url or not.
     # If you decide to crawl it, return True; otherwise return False.
     # There are already some conditions that return False.
 
-    #TODO: Detect and avoid sets of similar pages with no information: 
-        #chccking for near duplicates/exact duplicate: 
+    #TODO: Detect and avoid sets of similar pages with no information:
+        #chccking for near duplicates/exact duplicate:
             #checksums/ page fingerprints (simhash)
 
         #exact duplicates: use hashes - import hashlib and see if content is same
         #near duplicate: create a fingerprint and check
-    #if all coming from same origin - all they have is just nhumbers - clear  bad content - dont crawl this. detect werirdf patterns of urls. go manulaly check. and see if its good or bad content. 
+    #if all coming from same origin - all they have is just nhumbers - clear  bad content - dont crawl this. detect werirdf patterns of urls. go manulaly check. and see if its good or bad content.
 
-    #TODO:dont need domain checking do i - bc it starts from the list of domains listed?  yes check for them. only crawl from them. 
+    #TODO:dont need domain checking do i - bc it starts from the list of domains listed?  yes check for them. only crawl from them.
     #TODO: do i add the robots.txt thing or is it alr handled
-    
+   
     try:
         parsed = urlparse(url)
        
@@ -104,7 +102,7 @@ def is_valid(url):
         if not valid:
             return False
 
-        #check for calender trap (infinte) #check for infinite redirecting #check for long urls, repeating paths, 
+        #check for calender trap (infinte) #check for infinite redirecting #check for long urls, repeating paths,
 
          #robot.txt is appended at the end of the url  (placed usually at the root)
         #logic for this:  (robots.txt will either return a allow or disallow and based on thar we can determine if it is valid or not)
@@ -136,7 +134,7 @@ def is_valid(url):
             # else:
             #     return False
 
-        
+       
         return not re.match(
             r".*\.(css|js|bmp|gif|jpe?g|ico"
             + r"|png|tiff?|mid|mp2|mp3|mp4"
@@ -148,11 +146,11 @@ def is_valid(url):
             + r"|rm|smil|wmv|swf|wma|zip|rar|gz)$", parsed.path.lower())
 
 
-        #TODO: add the r'(calender|event|...
-        
-        if re.search(r'/\d{4}/\d{1,2}(/\d{1,2})?', parsed.path):
-             return False
-        #this blocks the year/month trap b/c with the year/month - 
+        #TODO: add the r'(calendar|event|...
+       
+        if re.search(r'(calendar|event|\d{4}-\d{2}-\d{2})', parsed.path.lower()):
+            return False
+        #this blocks the year/month trap b/c with the year/month -
         #it generates an unlimited amount of pages with inifinte years and each month - so once it sees this format then it gets blocked
 
 
@@ -164,8 +162,8 @@ def is_valid(url):
         for i in parsed.path.split('/'):
             if i:
                 parts_path.append(i)
-                
-        if len(parts_path) > 5: 
+               
+        if len(parts_path) > 5:
             return False
 
         if len(url) > 100:
@@ -174,7 +172,7 @@ def is_valid(url):
         #dont crawl any 'downloads' or 'attachmernts' in rhe path
         if 'download' in parsed.path() or 'attachment' in parsed.path():
             return False
-        
+       
         return True #or do i just do the above checks before the big return statement
 
     except TypeError:

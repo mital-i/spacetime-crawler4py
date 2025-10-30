@@ -2,6 +2,7 @@ import pickle
 
 class Response(object):
     def __init__(self, resp_dict):
+        # print(type(resp_dict["url"]), type(resp_dict["status"]))
         self.url = resp_dict["url"]
         self.status = resp_dict["status"]
         self.error = resp_dict["error"] if "error" in resp_dict else None
