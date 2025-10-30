@@ -2,11 +2,10 @@ from bs4 import BeautifulSoup
 import re
 from urllib.parse import urlparse, urljoin
 from urllib.robotparser import RobotFileParser
-import requests
 
 MAX_FILE_SIZE = 10 * 1024 * 1024
 MIN_WORD_LIMIT = 100 
-DEFAULT_DELAY = 5
+DEFAULT_DELAY = 5 #this seems to be in-built into the code 
 
 def scraper(url, resp):
     links = extract_next_links(url, resp)
@@ -33,7 +32,7 @@ def extract_next_links(url, resp):
             absolute_url = urljoin(url, href)
             parsed_url = urlparse(absolute_url)
             cleaned_url = parsed_url._replace(fragment='').geturl()
-            if is_valid_size(resp) and is_valid(cleaned_url):
+            if is_valid_size(html_content) and is_valid(cleaned_url):
                 links.add(cleaned_url)
         return list(links)
     except Exception as e:
@@ -41,6 +40,7 @@ def extract_next_links(url, resp):
         return []
     
 def is_valid_size(html_content):
+    
     soup = BeautifulSoup(html_content, 'html.parser')
     for script_or_style in soup(['script', 'style']):
         script_or_style.decompose()
@@ -74,7 +74,6 @@ def is_valid(url):
         ):
             return False
     
-
         if re.search(r'(calende|event|\d{4}-\d{2}-\d{2})', parsed.path.lower()):
             return False
 
@@ -91,14 +90,3 @@ def is_valid(url):
     
     return True
 
-def get_delay(url, user_agent='*'):
-    domain = urlparse(url).netloc
-    robots_url = f'https://{domain}/robots.txt'
-    response = requests.get(robots_url)
-    delay = None
-    if 200 <= response.status_code < 300:
-        rp = RobotFileParser()
-        rp.set_url(robots_url)
-        rp.read()
-        delay = rp.crawl_delay(user_agent)
-    return delay or DEFAULT_DELAY
