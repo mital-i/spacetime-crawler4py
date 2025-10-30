@@ -148,7 +148,7 @@ def is_valid(url):
 
         #TODO: add the r'(calender|event|...
        
-        if re.search(r'(calende|event|\d{4}-\d{2}-\d{2})', parsed.path.lower()):
+        if re.search(r'(calender|event|\d{4}-\d{2}-\d{2})', parsed.path.lower()):
             return False
         #this blocks the year/month trap b/c with the year/month -
         #it generates an unlimited amount of pages with inifinte years and each month - so once it sees this format then it gets blocked
