@@ -5,7 +5,7 @@ from urllib.robotparser import RobotFileParser
 import requests
 
 MAX_FILE_SIZE = 10 * 1024 * 1024
-MIN_WORD_LIMIT = 20000000 
+MIN_WORD_LIMIT = 100 
 DEFAULT_DELAY = 5
 
 def scraper(url, resp):
@@ -59,13 +59,6 @@ def is_valid(url):
             parsed.path.lower()
         ):
             return False
-
-    except TypeError:
-        print("TypeError for ", parsed)
-        #raise --> she wrote raise here, don't know what to do with it
-
-    try:
-        # next block goes here...
 
         metadata = requests.head(url)
 
