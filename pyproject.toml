@@ -1,0 +1,14 @@
+[project]
+name = "spacetime-crawler4py"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "cbor>=1.0.0",
+    "requests>=2.32.5",
+    "spacetime",
+]
+
+[tool.uv.sources]
+spacetime = { path = "packages/spacetime-2.1.1-py3-none-any.whl" }
