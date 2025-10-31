@@ -34,7 +34,7 @@ def extract_next_links(url, resp):
             absolute_url = urljoin(url, href)
             parsed_url = urlparse(absolute_url)
             cleaned_url = parsed_url._replace(fragment='').geturl()
-            if is_valid_file_size(url) and is_valid_word_count(html_content) and is_valid(cleaned_url) and not no_follow_meta(soup):
+            if is_valid_word_count(html_content) and is_valid(cleaned_url) and not no_follow_meta(soup):
                 links.add(cleaned_url)
         return list(links)
     except Exception as e:
