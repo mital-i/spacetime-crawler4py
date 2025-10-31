@@ -1,6 +1,8 @@
 from bs4 import BeautifulSoup
 import re
 from urllib.parse import urlparse, urljoin
+
+traps = ["isg.ics.uci.edu/events/*", "*/events/*", ".pdf", "ngs.ics", "eppstein/pix", "archive.ics.uci.edu"] 
 from urllib.robotparser import RobotFileParser
 
 MAX_FILE_SIZE = 10 * 1024 * 1024
@@ -50,18 +52,56 @@ def is_valid_size(html_content):
     return True 
 
 def is_valid(url):
+    # Decide whether to crawl this url or not.
+    # If you decide to crawl it, return True; otherwise return False.
+    # There are already some conditions that return False.
     try:
         parsed = urlparse(url)
         if parsed.scheme not in set(["http", "https"]):
             return False
 
-        allowed_domains = {".ics.uci.edu", "cs.uci.edu", "informatics.uci.edu", "stat.uci.edu"}
-        domain = parsed.netloc.lower()
-        valid = any(domain.endswith(allowed) for allowed in allowed_domains)
+        allowed_domains = {"ics.uci.edu", "cs.uci.edu", "informatics.uci.edu", "stat.uci.edu"}
+
+        domain = parsed.netloc.lower() 
+        #netloc is the domain name so i want to parse that
+
+        valid = False
+        for allowed in allowed_domains: #go thru the domains
+            if ((domain.endswith('.' + allowed)) or (domain == allowed)):
+                valid = True
+                break
         if not valid:
             return False
 
-        if re.match(
+        if re.search(r'(calendar|event|\d{4}-\d{2}-\d{2})', parsed.path.lower()):
+            return False
+            
+        #this blocks the year/month trap b/c with the year/month -
+        #it generates an unlimited amount of pages with inifinte years and each month - so once it sees this format then it gets blocked
+
+        #checking for infinte redirecting (a to b, b to c, c to d, ...)
+        #keep track of how many times a url has been visited (not more than 5 times?)
+
+        parts_path = []
+        for i in parsed.path.split('/'):
+            if i:
+                parts_path.append(i)
+               
+        if len(parts_path) > 5: #change to higher or leave it?
+            return False
+
+        if len(url) > 100: #change to higher no. or leave it?
+            return False
+
+        #dont crawl any 'downloads' or 'attachmernts' in the path
+        if 'download' in parsed.path.lower() or 'attachment' in parsed.path.lower():
+            return False
+
+        for i in traps:
+            if i in parsed.geturl():
+                return False
+
+        return not re.match(
             r".*\.(css|js|bmp|gif|jpe?g|ico"
             + r"|png|tiff?|mid|mp2|mp3|mp4"
             + r"|wav|avi|mov|mpeg|ram|m4v|mkv|ogg|ogv|pdf"
