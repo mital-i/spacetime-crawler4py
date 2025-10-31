@@ -1,12 +1,12 @@
 from bs4 import BeautifulSoup
 import re
 from urllib.parse import urlparse, urljoin
-from urllib.request import urlopen
 
 traps = ["isg.ics.uci.edu/events/*", "doku.php", "*/events/*", ".pdf", "ngs.ics", "eppstein/pix", "archive.ics.uci.edu"] 
 
 MAX_FILE_SIZE = 10^7 #10 megabytes
 MIN_WORD_LIMIT = 100 
+MAX_WORD_LIMIT = 250,000
 DEFAULT_DELAY = 5 #this seems to be in-built into the code 
 
 def scraper(url, resp):
@@ -40,19 +40,13 @@ def extract_next_links(url, resp):
     except Exception as e:
         print(f"Error parsing HTML for {url}: {e}")
         return []
-
-def is_valid_file_size(url):
-    with urlopen(url) as response:
-        content = response.read()
-        size = len(content) #size in bytes  
-        return size <= MAX_FILE_SIZE
         
 def is_valid_word_count(html_content):
     soup = BeautifulSoup(html_content, 'html.parser')
     for script_or_style in soup(['script', 'style']):
         script_or_style.decompose()
     text = soup.get_text()
-    if len(text.split()) < MIN_WORD_LIMIT:
+    if len(text.split()) < MIN_WORD_LIMIT or len(text.split()) > MAX_WORD_LIMIT:
         return False
     return True 
 
