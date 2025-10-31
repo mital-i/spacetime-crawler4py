@@ -1,11 +1,12 @@
 from bs4 import BeautifulSoup
 import re
 from urllib.parse import urlparse, urljoin
+from urllib.request import urlopen
 
 traps = ["isg.ics.uci.edu/events/*", "*/events/*", ".pdf", "ngs.ics", "eppstein/pix", "archive.ics.uci.edu"] 
 from urllib.robotparser import RobotFileParser
 
-MAX_FILE_SIZE = 10 * 1024 * 1024
+MAX_FILE_SIZE = 10^7 #10 megabytes
 MIN_WORD_LIMIT = 100 
 DEFAULT_DELAY = 5 #this seems to be in-built into the code 
 
@@ -34,15 +35,20 @@ def extract_next_links(url, resp):
             absolute_url = urljoin(url, href)
             parsed_url = urlparse(absolute_url)
             cleaned_url = parsed_url._replace(fragment='').geturl()
-            if is_valid_size(html_content) and is_valid(cleaned_url) and not no_follow_meta(soup):
+            if is_valid_file_size(url) and is_valid_word_count(html_content) and is_valid(cleaned_url) and not no_follow_meta(soup):
                 links.add(cleaned_url)
         return list(links)
     except Exception as e:
         print(f"Error parsing HTML for {url}: {e}")
         return []
-    
-def is_valid_size(html_content):
-    
+
+def is_valid_file_size(url):
+    with urlopen(url) as response:
+        content = response.read()
+        size = len(content) #size in bytes  
+        return size <= MAX_FILE_SIZE
+        
+def is_valid_word_count(html_content):
     soup = BeautifulSoup(html_content, 'html.parser')
     for script_or_style in soup(['script', 'style']):
         script_or_style.decompose()
