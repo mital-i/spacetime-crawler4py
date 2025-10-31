@@ -2,12 +2,12 @@ from bs4 import BeautifulSoup
 import re
 from urllib.parse import urlparse, urljoin
 
-traps = ["isg.ics.uci.edu/events/*", "*/events/*", ".pdf", "ngs.ics", "eppstein/pix", "archive.ics.uci.edu"] 
-from urllib.robotparser import RobotFileParser
+traps = ["isg.ics.uci.edu/events/*", "doku.php", "*/events/*", ".pdf", "ngs.ics", "eppstein/pix", "archive.ics.uci.edu"] 
 
 MAX_FILE_SIZE = 10 * 1024 * 1024
 MIN_WORD_LIMIT = 100 
 DEFAULT_DELAY = 5 #this seems to be in-built into the code 
+
 
 def scraper(url, resp):
     links = extract_next_links(url, resp)
@@ -87,7 +87,7 @@ def is_valid(url):
             if i:
                 parts_path.append(i)
                
-        if len(parts_path) > 5: #change to higher or leave it?
+        if len(parts_path) > 10: #change to higher or leave it?
             return False
 
         if len(url) > 100: #change to higher no. or leave it?
