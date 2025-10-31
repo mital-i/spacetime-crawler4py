@@ -1,9 +1,11 @@
 from bs4 import BeautifulSoup
 import re
 from urllib.parse import urlparse, urljoin
-traps = ["isg.ics.uci.edu/events/*", "*/events/*", ".pdf", "ngs.ics", "eppstein/pix", "archive.ics.uci.edu"] 
+from urllib.request import urlopen
 
-MAX_FILE_SIZE = 10 * 1024 * 1024
+traps = ["isg.ics.uci.edu/events/*", "doku.php", "*/events/*", ".pdf", "ngs.ics", "eppstein/pix", "archive.ics.uci.edu"] 
+
+MAX_FILE_SIZE = 10^7 #10 megabytes
 MIN_WORD_LIMIT = 100 
 DEFAULT_DELAY = 5 #this seems to be in-built into the code 
 
@@ -32,14 +34,20 @@ def extract_next_links(url, resp):
             absolute_url = urljoin(url, href)
             parsed_url = urlparse(absolute_url)
             cleaned_url = parsed_url._replace(fragment='').geturl()
-            if is_valid_size(html_content) and is_valid(cleaned_url):
+            if is_valid_file_size(url) and is_valid_word_count(html_content) and is_valid(cleaned_url) and not no_follow_meta(soup):
                 links.add(cleaned_url)
         return list(links)
     except Exception as e:
         print(f"Error parsing HTML for {url}: {e}")
         return []
-    
-def is_valid_size(html_content):
+
+def is_valid_file_size(url):
+    with urlopen(url) as response:
+        content = response.read()
+        size = len(content) #size in bytes  
+        return size <= MAX_FILE_SIZE
+        
+def is_valid_word_count(html_content):
     soup = BeautifulSoup(html_content, 'html.parser')
     for script_or_style in soup(['script', 'style']):
         script_or_style.decompose()
@@ -47,6 +55,11 @@ def is_valid_size(html_content):
     if len(text.split()) < MIN_WORD_LIMIT:
         return False
     return True 
+
+def no_follow_meta(soup):
+    robot = soup.find('meta', attrs={'name': 'robots'})
+    if robot and 'nofollow' in robot.get('content', '').lower():
+        return robot and 'nofollow' in robot.get('content', '').lower()
 
 def is_valid(url):
     # Decide whether to crawl this url or not.
@@ -84,7 +97,7 @@ def is_valid(url):
             if i:
                 parts_path.append(i)
                
-        if len(parts_path) > 5: #change to higher or leave it?
+        if len(parts_path) > 10: #change to higher or leave it?
             return False
 
         if len(url) > 100: #change to higher no. or leave it?
@@ -106,24 +119,12 @@ def is_valid(url):
             + r"|data|dat|exe|bz2|tar|msi|bin|7z|psd|dmg|iso"
             + r"|epub|dll|cnf|tgz|sha1"
             + r"|thmx|mso|arff|rtf|jar|csv"
-            + r"|rm|smil|wmv|swf|wma|zip|rar|gz)$", parsed.path.lower()):
-            return False
+            + r"|rm|smil|wmv|swf|wma|zip|rar|gz)$", parsed.path.lower())
 
-        #TODO: add the r'(calender|event|...
-       
-        if re.search(r'(calender|event|\d{4}-\d{2}-\d{2})', parsed.path.lower()):
-            return False
+        return True #or do i just do the above checks before the big return statement
 
-        parts_path = [i for i in parsed.path.split('/') if i]
-        if len(parts_path) > 5 or len(url) > 100:
-            return False
-
-        if 'download' in parsed.path or 'attachment' in parsed.path:
-            return False
-
-    except Exception as e:
-        print(f"Error accessing or decoding raw content for {url}: {e}")
-        return False
+    except TypeError:
+        print("TypeError for ", parsed)
+        raise
     
-    return True
 
