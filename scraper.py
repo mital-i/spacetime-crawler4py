@@ -5,7 +5,7 @@ from urllib.parse import urlparse, urljoin
 traps = ["isg.ics.uci.edu/events/*", "doku.php", "*/events/*", ".pdf", "ngs.ics", "eppstein/pix", "archive.ics.uci.edu"] 
 
 MIN_WORD_LIMIT = 100 
-MAX_WORD_LIMIT = 250,000
+MAX_WORD_LIMIT = 250_000
 DEFAULT_DELAY = 5 #this seems to be in-built into the code 
 
 def scraper(url, resp):
