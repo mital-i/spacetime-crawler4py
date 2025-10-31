@@ -3,11 +3,15 @@ import re
 from urllib.parse import urlparse, urljoin
 
 traps = ["isg.ics.uci.edu/events/*", "*/events/*", ".pdf", "ngs.ics", "eppstein/pix", "archive.ics.uci.edu"] 
+from urllib.robotparser import RobotFileParser
+
+MAX_FILE_SIZE = 10 * 1024 * 1024
+MIN_WORD_LIMIT = 100 
+DEFAULT_DELAY = 5 #this seems to be in-built into the code 
 
 def scraper(url, resp):
     links = extract_next_links(url, resp)
     return [link for link in links if is_valid(link)]
-    
 
 def extract_next_links(url, resp):
     if resp.status != 200 or resp.raw_response is None:
@@ -30,20 +34,29 @@ def extract_next_links(url, resp):
             absolute_url = urljoin(url, href)
             parsed_url = urlparse(absolute_url)
             cleaned_url = parsed_url._replace(fragment='').geturl()
-            if is_valid(cleaned_url):
+            if is_valid_size(html_content) and is_valid(cleaned_url):
                 links.add(cleaned_url)
         return list(links)
     except Exception as e:
         print(f"Error parsing HTML for {url}: {e}")
         return []
-        
+    
+def is_valid_size(html_content):
+    
+    soup = BeautifulSoup(html_content, 'html.parser')
+    for script_or_style in soup(['script', 'style']):
+        script_or_style.decompose()
+    text = soup.get_text()
+    if len(text.split()) < MIN_WORD_LIMIT:
+        return False
+    return True 
+
 def is_valid(url):
     # Decide whether to crawl this url or not.
     # If you decide to crawl it, return True; otherwise return False.
     # There are already some conditions that return False.
     try:
         parsed = urlparse(url)
-       
         if parsed.scheme not in set(["http", "https"]):
             return False
 
@@ -100,6 +113,3 @@ def is_valid(url):
        
         return True #or do i just do the above checks before the big return statement
 
-    except TypeError:
-        print ("TypeError for ", parsed)
-        raise
