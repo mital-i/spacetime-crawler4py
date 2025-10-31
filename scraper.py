@@ -1,9 +1,7 @@
 from bs4 import BeautifulSoup
 import re
 from urllib.parse import urlparse, urljoin
-
 traps = ["isg.ics.uci.edu/events/*", "*/events/*", ".pdf", "ngs.ics", "eppstein/pix", "archive.ics.uci.edu"] 
-from urllib.robotparser import RobotFileParser
 
 MAX_FILE_SIZE = 10 * 1024 * 1024
 MIN_WORD_LIMIT = 100 
@@ -42,7 +40,6 @@ def extract_next_links(url, resp):
         return []
     
 def is_valid_size(html_content):
-    
     soup = BeautifulSoup(html_content, 'html.parser')
     for script_or_style in soup(['script', 'style']):
         script_or_style.decompose()
