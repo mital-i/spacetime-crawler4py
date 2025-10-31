@@ -32,7 +32,7 @@ def extract_next_links(url, resp):
             absolute_url = urljoin(url, href)
             parsed_url = urlparse(absolute_url)
             cleaned_url = parsed_url._replace(fragment='').geturl()
-            if is_valid_size(html_content) and is_valid(cleaned_url):
+            if is_valid_size(html_content) and is_valid(cleaned_url) and not no_follow_meta(soup):
                 links.add(cleaned_url)
         return list(links)
     except Exception as e:
@@ -48,6 +48,11 @@ def is_valid_size(html_content):
     if len(text.split()) < MIN_WORD_LIMIT:
         return False
     return True 
+
+def no_follow_meta(soup):
+    robot = soup.find('meta', attrs={'name': 'robots'})
+    if robot and 'nofollow' in robot.get('content', '').lower():
+        return robot and 'nofollow' in robot.get('content', '').lower()
 
 def is_valid(url):
     try:
