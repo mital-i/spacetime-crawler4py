@@ -5,7 +5,7 @@ from urllib.parse import urlparse, urljoin
 traps = ["isg.ics.uci.edu/events/*", "doku.php", "*/events/*", ".pdf", "ngs.ics", "eppstein/pix", "archive.ics.uci.edu"] 
 
 MIN_WORD_LIMIT = 100 
-MAX_WORD_LIMIT = 250_000
+MAX_WORD_LIMIT = 250000
 DEFAULT_DELAY = 5 #this seems to be in-built into the code 
 
 def scraper(url, resp):
@@ -45,7 +45,7 @@ def is_valid_word_count(html_content):
     for script_or_style in soup(['script', 'style']):
         script_or_style.decompose()
     text = soup.get_text()
-    if len(text.split()) < MIN_WORD_LIMIT or len(text.split()) > MAX_WORD_LIMIT:
+    if (len(text.split()) < MIN_WORD_LIMIT) or (len(text.split()) > MAX_WORD_LIMIT):
         return False
     return True 
 
