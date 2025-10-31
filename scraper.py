@@ -9,7 +9,6 @@ MAX_FILE_SIZE = 10^7 #10 megabytes
 MIN_WORD_LIMIT = 100 
 DEFAULT_DELAY = 5 #this seems to be in-built into the code 
 
-
 def scraper(url, resp):
     links = extract_next_links(url, resp)
     return [link for link in links if is_valid(link)]
