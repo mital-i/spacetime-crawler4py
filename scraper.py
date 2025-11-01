@@ -43,8 +43,8 @@ def extract_next_links(url, resp):
         if no_follow_meta(soup):
             return[]
 
-        if (words > MIN_WORD_LIMIT) or (words < MAX_WORD_LIMIT):
-            tokenizer(url, soup)  #check for function3
+        # if (words > MIN_WORD_LIMIT) or (words < MAX_WORD_LIMIT):
+        #     tokenizer(url, soup)  #check for function3
 
         links = set()
         for link_tag in soup.find_all('a', href=True):
@@ -112,7 +112,6 @@ def tokenizer(url, soup):
     for i in text_words:
         i = i.lower()
         if i not in stop_words:
-            if i in token_freq:
             if i in token_freq:
                 token_freq[i] += 1 
             else:
