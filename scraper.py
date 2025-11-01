@@ -97,18 +97,13 @@ def tokenizer(url, soup):
     "why", "why's", "with", "won't", "would", "wouldn't", "you", "you'd", "you'll", 
     "you're", "you've", "your", "yours", "yourself", "yourselves"}
 
-    words = []
     for i in text_words:
         i = i.lower()
-        if i not in stop_words and len(i) > 1: #checks if its not one of the 50 common words
-            words.append(i)
-            #token_freq[i] += 1 #adds to token freq
-
-    for word in words:
-        if word in token_freq:
-            token_freq[word] += 1 
-        else:
-            token_freq[word] = 1
+        if i not in stop_words:
+            if i not in token_freq:
+                token_freq[i] += 1 
+            else:
+                token_freq[i] = 1
 
     
 def is_valid(url):
