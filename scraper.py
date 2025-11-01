@@ -7,6 +7,8 @@ traps = ["isg.ics.uci.edu/events/*", "doku.php", "*/events/*", ".pdf", "ngs.ics"
 MIN_WORD_LIMIT = 100 
 MAX_WORD_LIMIT = 250000
 DEFAULT_DELAY = 5 #this seems to be in-built into the code 
+maximum_words_found = 0
+maximum_words_page = None
 
 def scraper(url, resp):
     links = extract_next_links(url, resp)
@@ -33,21 +35,32 @@ def extract_next_links(url, resp):
             absolute_url = urljoin(url, href)
             parsed_url = urlparse(absolute_url)
             cleaned_url = parsed_url._replace(fragment='').geturl()
-            if is_valid_word_count(html_content) and is_valid(cleaned_url) and not no_follow_meta(soup):
+
+            #functionality to strip style and count words
+            #if over or under word count --> reject link
+            words = word_count(html_content)
+            if (words < MIN_WORD_LIMIT) or (words > MAX_WORD_LIMIT):
+                return False
+            return True 
+
+            if is_valid(cleaned_url) and not no_follow_meta(soup):
                 links.add(cleaned_url)
+                #find maximum words in a valid page for report
+                if word_count > maximum_words_found:
+                    maximum_words_found = word_count
+                    maximum_words_page = cleaned_url
         return list(links)
     except Exception as e:
         print(f"Error parsing HTML for {url}: {e}")
         return []
-        
-def is_valid_word_count(html_content):
+
+def word_count(html_content):
     soup = BeautifulSoup(html_content, 'html.parser')
     for script_or_style in soup(['script', 'style']):
         script_or_style.decompose()
     text = soup.get_text()
-    if (len(text.split()) < MIN_WORD_LIMIT) or (len(text.split()) > MAX_WORD_LIMIT):
-        return False
-    return True 
+    return len(text.split())
+    
 
 def no_follow_meta(soup):
     robot = soup.find('meta', attrs={'name': 'robots'})
