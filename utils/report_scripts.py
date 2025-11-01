@@ -40,9 +40,7 @@ def analyze_subdomains(unique_urls):
         parsed = urlparse(url)
         netloc = parsed.netloc.lower()
         
-        # Check if the domain ends with '.uci.edu' or is exactly 'uci.edu'
         if netloc.endswith('.uci.edu') or netloc == 'uci.edu':
-            # The full netloc (domain) serves as the subdomain identifier
             subdomain_freq[netloc] += 1
             
     return dict(subdomain_freq)

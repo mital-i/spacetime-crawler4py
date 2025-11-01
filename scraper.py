@@ -29,11 +29,6 @@ def extract_next_links(url, resp):
         return []
     try:
         soup = BeautifulSoup(html_content, 'lxml')
-
-        if not is_valid_word_count(html_content): #check for function1
-            return []
-        if no_follow_meta(soup):  #check for function2
-            return []
         tokenizer(url, soup)  #check for function3
 
         links = set()
@@ -105,15 +100,6 @@ def tokenizer(url, soup):
         i = i.lower()
         if i not in stop_words and len(i) > 1: #checks if its not one of the 50 common words
             token_freq[i] += 1 #adds to token freq
-
-    # sorted_freq = sorted(token_freq.items(), key = lambda item: item[1], reverse = True)
-    # for key, val in sorted_freq[:50]: #gets 50 common words
-    #     print(f"{key} - {val}") #print this in the last function
-
-    # no_fragment_url,_ = urldefrag(url) #no fragment url
-    # subdomains_track(no_fragment_url)
-
-    #unique pages #subdomains
 
 def subdomains_track(url):
     global subdomains_pages
@@ -189,9 +175,3 @@ def is_valid(url):
     except TypeError:
         print("TypeError for ", parsed)
         raise
-    
-
-#def report_writeout():
-    #unique, word counht, subdomains, common words
-
-
