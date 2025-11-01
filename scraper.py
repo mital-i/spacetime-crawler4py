@@ -11,7 +11,6 @@ maximum_words_found = 0
 maximum_words_page = None
 token_freq = {}
 
-
 def scraper(url, resp):
     links = extract_next_links(url, resp)
     return [link for link in links if is_valid(link)]
@@ -99,7 +98,7 @@ def tokenizer(url, soup):
     for i in text_words:
         i = i.lower()
         if i not in stop_words:
-            if i not in token_freq:
+            if i in token_freq:
                 token_freq[i] += 1 
             else:
                 token_freq[i] = 1
