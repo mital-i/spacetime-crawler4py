@@ -34,9 +34,18 @@ def extract_next_links(url, resp):
         #functionality to strip style and count words
         #if over or under word count --> reject link
         words = word_count(html_content)
-        if (words < MIN_WORD_LIMIT) or (words > MAX_WORD_LIMIT):
-            return []
-        tokenizer(url, soup)  #check for function3
+        # if (words < MIN_WORD_LIMIT) or (words > MAX_WORD_LIMIT):
+        #     return []
+        #find maximum words in a valid page for report
+        if word_count > maximum_words_found:
+            maximum_words_found = word_count
+            maximum_words_page = cleaned_url
+
+        if no_follow_meta(soup):
+            return[]
+
+        if (words > MIN_WORD_LIMIT) or (words < MAX_WORD_LIMIT):
+            tokenizer(url, soup)  #check for function3
 
         links = set()
         for link_tag in soup.find_all('a', href=True):
@@ -52,12 +61,9 @@ def extract_next_links(url, resp):
             #     return False
             # return True 
 
-            if is_valid(cleaned_url) and not no_follow_meta(soup):
+            if is_valid(cleaned_url):
                 links.add(cleaned_url)
-                #find maximum words in a valid page for report
-                if word_count > maximum_words_found:
-                    maximum_words_found = word_count
-                    maximum_words_page = cleaned_url
+                
         return list(links)
     except Exception as e:
         print(f"Error parsing HTML for {url}: {e}")
