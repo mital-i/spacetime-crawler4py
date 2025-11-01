@@ -11,7 +11,6 @@ maximum_words_found = 0
 maximum_words_page = None
 token_freq = {}
 
-
 def scraper(url, resp):
     links = extract_next_links(url, resp)
     return [link for link in links if is_valid(link)]
@@ -56,10 +55,13 @@ def extract_next_links(url, resp):
 
             #functionality to strip style and count words
             #if over or under word count --> reject link
-            # words = word_count(html_content)
-            # if (words < MIN_WORD_LIMIT) or (words > MAX_WORD_LIMIT):
-            #     return False
-            # return True 
+            words = word_count(html_content)
+            if (words < MIN_WORD_LIMIT) or (words > MAX_WORD_LIMIT):
+                continue
+            
+            if words > maximum_words_found:
+                    maximum_words_found = words
+                    maximum_words_page = cleaned_url
 
             if is_valid(cleaned_url):
                 links.add(cleaned_url)
@@ -110,6 +112,7 @@ def tokenizer(url, soup):
     for i in text_words:
         i = i.lower()
         if i not in stop_words:
+            if i in token_freq:
             if i in token_freq:
                 token_freq[i] += 1 
             else:
@@ -192,5 +195,5 @@ def crawler_end():
     sorted_freq = sorted(token_freq.items(), key = lambda item: item[1], reverse = True)
     with open("50_most_common.txt", "w") as f1:
         for key, val in sorted_freq[:50]:
-            print(f"{key} - {val}")
+            f.write(f"{key} - {val}")
 
