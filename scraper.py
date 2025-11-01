@@ -10,7 +10,7 @@ DEFAULT_DELAY = 5 #this seems to be in-built into the code
 maximum_words_found = 0
 maximum_words_page = None
 token_freq = {}
-#page_count_long = {}
+
 
 def scraper(url, resp):
     links = extract_next_links(url, resp)
@@ -74,7 +74,6 @@ def no_follow_meta(soup):
 
     
 def tokenizer(url, soup):
-    #50 most common words in english
     global token_freq
 
     text_words = (soup.get_text(separator=" ")).split()
@@ -98,8 +97,6 @@ def tokenizer(url, soup):
     "why", "why's", "with", "won't", "would", "wouldn't", "you", "you'd", "you'll", 
     "you're", "you've", "your", "yours", "yourself", "yourselves"}
 
-    #token_freq = {}
-
     words = []
     for i in text_words:
         i = i.lower()
@@ -112,9 +109,6 @@ def tokenizer(url, soup):
             token_freq[word] += 1 
         else:
             token_freq[word] = 1
-
-    #no_fragment_url,_ = urldefrag(url) #no fragment url
-    #page_count_long[no_fragment_url] = len(words) #
 
     
 def is_valid(url):
