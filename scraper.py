@@ -62,7 +62,7 @@ def no_follow_meta(soup):
         return robot and 'nofollow' in robot.get('content', '').lower()
 
     
-def tokenizer(url):
+def tokenizer(url, soup):
     #50 most common words in english
 
     text_words = (soup.get_text(separator=" ")).split()
@@ -93,12 +93,12 @@ def tokenizer(url):
         if i not in stop_words and len(i) > 1: #checks if its not one of the 50 common words
             token_freq[i] += 1 #adds to token freq
 
-    sorted_freq = sorted(token_freq.items(), key = lambda item: item[1], reverse = True)
-    for key, val in sorted_freq[:50]: #gets 50 common words
-        print(f"{key} - {val}") #print this in the last function
+    # sorted_freq = sorted(token_freq.items(), key = lambda item: item[1], reverse = True)
+    # for key, val in sorted_freq[:50]: #gets 50 common words
+    #     print(f"{key} - {val}") #print this in the last function
 
-    no_fragment_url,_ = urldefrag(url) #no fragment url
-    subdomains_track(no_fragment_url)
+    # no_fragment_url,_ = urldefrag(url) #no fragment url
+    # subdomains_track(no_fragment_url)
 
     #unique pages #subdomains
 
