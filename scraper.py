@@ -31,7 +31,11 @@ def extract_next_links(url, resp):
         return []
     try:
         soup = BeautifulSoup(html_content, 'lxml')
-
+        #functionality to strip style and count words
+        #if over or under word count --> reject link
+        words = word_count(html_content)
+        if (words < MIN_WORD_LIMIT) or (words > MAX_WORD_LIMIT):
+            return []
         tokenizer(url, soup)  #check for function3
 
         links = set()
@@ -43,10 +47,10 @@ def extract_next_links(url, resp):
 
             #functionality to strip style and count words
             #if over or under word count --> reject link
-            words = word_count(html_content)
-            if (words < MIN_WORD_LIMIT) or (words > MAX_WORD_LIMIT):
-                return False
-            return True 
+            # words = word_count(html_content)
+            # if (words < MIN_WORD_LIMIT) or (words > MAX_WORD_LIMIT):
+            #     return False
+            # return True 
 
             if is_valid(cleaned_url) and not no_follow_meta(soup):
                 links.add(cleaned_url)
@@ -100,7 +104,7 @@ def tokenizer(url, soup):
     for i in text_words:
         i = i.lower()
         if i not in stop_words:
-            if i not in token_freq:
+            if i in token_freq:
                 token_freq[i] += 1 
             else:
                 token_freq[i] = 1
