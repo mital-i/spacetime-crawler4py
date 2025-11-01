@@ -45,8 +45,7 @@ def extract_next_links(url, resp):
             #if over or under word count --> reject link
             words = word_count(html_content)
             if (words < MIN_WORD_LIMIT) or (words > MAX_WORD_LIMIT):
-                return False
-            return True 
+                continue
 
             if is_valid(cleaned_url) and not no_follow_meta(soup):
                 links.add(cleaned_url)
