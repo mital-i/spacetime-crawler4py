@@ -9,6 +9,8 @@ MAX_WORD_LIMIT = 250000
 DEFAULT_DELAY = 5 #this seems to be in-built into the code 
 maximum_words_found = 0
 maximum_words_page = None
+token_freq = {}
+#page_count_long = {}
 
 def scraper(url, resp):
     links = extract_next_links(url, resp)
@@ -30,10 +32,6 @@ def extract_next_links(url, resp):
     try:
         soup = BeautifulSoup(html_content, 'lxml')
 
-        if not is_valid_word_count(html_content): #check for function1
-            return []
-        if no_follow_meta(soup):  #check for function2
-            return []
         tokenizer(url, soup)  #check for function3
 
         links = set()
@@ -77,6 +75,7 @@ def no_follow_meta(soup):
     
 def tokenizer(url, soup):
     #50 most common words in english
+    global token_freq
 
     text_words = (soup.get_text(separator=" ")).split()
     stop_words = {"a", "about", "above", "after", "again", "against", "all", "am", "an", "and",
@@ -99,30 +98,24 @@ def tokenizer(url, soup):
     "why", "why's", "with", "won't", "would", "wouldn't", "you", "you'd", "you'll", 
     "you're", "you've", "your", "yours", "yourself", "yourselves"}
 
-    token_freq = {}
+    #token_freq = {}
 
+    words = []
     for i in text_words:
         i = i.lower()
         if i not in stop_words and len(i) > 1: #checks if its not one of the 50 common words
-            token_freq[i] += 1 #adds to token freq
+            words.append(i)
+            #token_freq[i] += 1 #adds to token freq
 
-    # sorted_freq = sorted(token_freq.items(), key = lambda item: item[1], reverse = True)
-    # for key, val in sorted_freq[:50]: #gets 50 common words
-    #     print(f"{key} - {val}") #print this in the last function
+    for word in words:
+        if word in token_freq:
+            token_freq[word] += 1 
+        else:
+            token_freq[word] = 1
 
-    # no_fragment_url,_ = urldefrag(url) #no fragment url
-    # subdomains_track(no_fragment_url)
+    #no_fragment_url,_ = urldefrag(url) #no fragment url
+    #page_count_long[no_fragment_url] = len(words) #
 
-    #unique pages #subdomains
-
-def subdomains_track(url):
-    global subdomains_pages
-    try:
-        parsed = urlparse(url)
-        if parsed.hostname and parsed.hostname.endswith('.uci.edu'):
-            subdomains_pages[parsed.hostname.lower()].add(url)
-    except Exception as e:
-        print(e)
     
 def is_valid(url):
     # Decide whether to crawl this url or not.
@@ -190,8 +183,10 @@ def is_valid(url):
         print("TypeError for ", parsed)
         raise
     
+def crawler_end():
+    global token_freq
 
-#def report_writeout():
-    #unique, word counht, subdomains, common words
-
+    with open("token.txt", "w") as f:
+        for word, count in token_freq.items():
+            f.write(f"{word} - {count}\n")
 

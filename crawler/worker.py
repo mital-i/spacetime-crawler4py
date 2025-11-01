@@ -37,6 +37,7 @@ class Worker(Thread):
             tbd_url = self.shared_state.frontier.get_tbd_url()
             if not tbd_url:
                 self.logger.info("Frontier is empty. Stopping Crawler.")
+                scraper.crawler_end()
                 break
 
             parse = urlparse(tbd_url)
