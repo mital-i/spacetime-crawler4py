@@ -95,7 +95,7 @@ def tokenizer(url):
 
     sorted_freq = sorted(token_freq.items(), key = lambda item: item[1], reverse = True)
     for key, val in sorted_freq[:50]: #gets 50 common words
-        print(f"{key} - {val}")
+        print(f"{key} - {val}") #print this in the last function
 
     no_fragment_url,_ = urldefrag(url) #no fragment url
     subdomains_track(no_fragment_url)
@@ -177,4 +177,8 @@ def is_valid(url):
         print("TypeError for ", parsed)
         raise
     
+
+#def report_writeout():
+    #unique, word counht, subdomains, common words
+
 
