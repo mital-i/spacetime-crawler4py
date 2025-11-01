@@ -184,3 +184,8 @@ def crawler_end():
         for word, count in token_freq.items():
             f.write(f"{word} - {count}\n")
 
+    sorted_freq = sorted(token_freq.items(), key = lambda item: item[1], reverse = True)
+    with open("50_most_common.txt", "w") as f1:
+        for key, val in sorted_freq[:50]:
+            print(f"{key} - {val}")
+
