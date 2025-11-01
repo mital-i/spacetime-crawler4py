@@ -27,6 +27,13 @@ def extract_next_links(url, resp):
         return []
     try:
         soup = BeautifulSoup(html_content, 'lxml')
+
+        if not is_valid_word_count(html_content): #check for function1
+            return []
+        if no_follow_meta(soup):  #check for function2
+            return []
+        tokenizer(url, soup)  #check for function3
+
         links = set()
         for link_tag in soup.find_all('a', href=True):
             href = link_tag.get('href')
@@ -57,6 +64,7 @@ def no_follow_meta(soup):
     
 def tokenizer(url):
     #50 most common words in english
+
     text_words = (soup.get_text(separator=" ")).split()
     stop_words = {"a", "about", "above", "after", "again", "against", "all", "am", "an", "and",
     "any", "are", "aren't", "as", "at", "be", "because", "been", "before", "being", 
@@ -82,14 +90,26 @@ def tokenizer(url):
 
     for i in text_words:
         i = i.lower()
-        if i not in stop_words: #checks if its not one of the 50 common words
+        if i not in stop_words and len(i) > 1: #checks if its not one of the 50 common words
             token_freq[i] += 1 #adds to token freq
 
-    sorted_freq = sorted(frequencies.items(), key = lambda item: item[1], reverse = True)
-    for key, val in sorted_freq[:50]:
+    sorted_freq = sorted(token_freq.items(), key = lambda item: item[1], reverse = True)
+    for key, val in sorted_freq[:50]: #gets 50 common words
         print(f"{key} - {val}")
 
+    no_fragment_url,_ = urldefrag(url) #no fragment url
+    subdomains_track(no_fragment_url)
 
+    #unique pages #subdomains
+
+def subdomains_track(url):
+    global subdomains_pages
+    try:
+        parsed = urlparse(url)
+        if parsed.hostname and parsed.hostname.endswith('.uci.edu'):
+            subdomains_pages[parsed.hostname.lower()].add(url)
+    except Exception as e:
+        print(e)
     
 def is_valid(url):
     # Decide whether to crawl this url or not.
