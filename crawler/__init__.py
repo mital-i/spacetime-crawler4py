@@ -9,6 +9,7 @@ class SharedState:
         self.lock = threading.Lock()
         self.frontier = frontier_factory()
         self.cooldowns = dict()
+        self.crawler_ended = False
 
 class Crawler(object):
     def __init__(self, config, restart, frontier_factory=Frontier, worker_factory=Worker):
