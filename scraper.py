@@ -16,6 +16,16 @@ def scraper(url, resp):
     return [link for link in links if is_valid(link)]
 
 def extract_next_links(url, resp):
+    raw_bytes = resp.raw_response.content
+    if isinstance(raw_bytes, bytes):
+        html_content = raw_bytes.decode('utf-8', errors='ignore')
+    else:
+        html_content = str(raw_bytes)
+    soup = BeautifulSoup(html_content, 'lxml')
+    tokenizer(url, soup)
+    return []
+
+    global maximum_words_found, maximum_words_page
     if resp.status != 200 or resp.raw_response is None:
         return []
     html_content = None
@@ -38,13 +48,13 @@ def extract_next_links(url, resp):
         #find maximum words in a valid page for report
         if word_count > maximum_words_found:
             maximum_words_found = word_count
-            maximum_words_page = cleaned_url
+            maximum_words_page = url
 
         if no_follow_meta(soup):
             return[]
 
-        # if (words > MIN_WORD_LIMIT) or (words < MAX_WORD_LIMIT):
-        #     tokenizer(url, soup)  #check for function3
+        if (words > MIN_WORD_LIMIT) or (words < MAX_WORD_LIMIT):
+            tokenizer(url, soup)  #check for function3
 
         links = set()
         for link_tag in soup.find_all('a', href=True):
@@ -59,9 +69,9 @@ def extract_next_links(url, resp):
             if (words < MIN_WORD_LIMIT) or (words > MAX_WORD_LIMIT):
                 continue
             
-            if words > maximum_words_found:
-                    maximum_words_found = words
-                    maximum_words_page = cleaned_url
+            # if words > maximum_words_found:
+            #         maximum_words_found = words
+            #         maximum_words_page = cleaned_url
 
             if is_valid(cleaned_url):
                 links.add(cleaned_url)
@@ -111,7 +121,7 @@ def tokenizer(url, soup):
 
     for i in text_words:
         i = i.lower()
-        if i not in stop_words:
+        if i.isalnum() and i not in stop_words:
             if i in token_freq:
                 token_freq[i] += 1 
             else:
@@ -194,5 +204,5 @@ def crawler_end():
     sorted_freq = sorted(token_freq.items(), key = lambda item: item[1], reverse = True)
     with open("50_most_common.txt", "w") as f1:
         for key, val in sorted_freq[:50]:
-            f.write(f"{key} - {val}")
+            f1.write(f"{key} - {val}\n")
 
