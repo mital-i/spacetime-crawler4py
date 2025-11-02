@@ -36,8 +36,12 @@ class Worker(Thread):
             # pop is threadsafe
             tbd_url = self.shared_state.frontier.get_tbd_url()
             if not tbd_url:
-                self.logger.info("Frontier is empty. Stopping Crawler.")
-                scraper.crawler_end()
+                self.logger.info("Frontier is empty. Writing stats to disk...")
+                with self.shared_state.lock:
+                    if not self.shared_state.crawler_ended:
+                        scraper.crawler_end()
+                        self.shared_state.crawler_ended = True
+
                 break
 
             parse = urlparse(tbd_url)
