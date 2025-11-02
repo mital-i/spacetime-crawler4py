@@ -16,6 +16,7 @@ def scraper(url, resp):
     return [link for link in links if is_valid(link)]
 
 def extract_next_links(url, resp):
+    global maximum_words_found, maximum_words_page
     if resp.status != 200 or resp.raw_response is None:
         return []
     html_content = None
@@ -30,25 +31,23 @@ def extract_next_links(url, resp):
         return []
     try:
         soup = BeautifulSoup(html_content, 'lxml')
-
+        words = word_count(html_content)
+        if (words < MIN_WORD_LIMIT) or (words > MAX_WORD_LIMIT):
+            return []
+            
+        if words > maximum_words_found:
+            maximum_words_found = words
+            maximum_words_page = url
+        
         tokenizer(url, soup)  #check for function3
 
         links = set()
+
         for link_tag in soup.find_all('a', href=True):
             href = link_tag.get('href')
             absolute_url = urljoin(url, href)
             parsed_url = urlparse(absolute_url)
             cleaned_url = parsed_url._replace(fragment='').geturl()
-
-            #functionality to strip style and count words
-            #if over or under word count --> reject link
-            words = word_count(html_content)
-            if (words < MIN_WORD_LIMIT) or (words > MAX_WORD_LIMIT):
-                continue
-            
-            if words > maximum_words_found:
-                    maximum_words_found = words
-                    maximum_words_page = cleaned_url
 
             if is_valid(cleaned_url) and not no_follow_meta(soup):
                 links.add(cleaned_url)
