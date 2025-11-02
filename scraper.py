@@ -22,6 +22,7 @@ def extract_next_links(url, resp):
     try:
         raw_bytes = resp.raw_response.content
         if isinstance(raw_bytes, bytes):
+            #errors: ignore may cause some content to be lost
             html_content = raw_bytes.decode('utf-8', errors='ignore')
         else:
             html_content = str(raw_bytes)
@@ -30,7 +31,7 @@ def extract_next_links(url, resp):
         return []
     try:
         soup = BeautifulSoup(html_content, 'lxml')
-        words = word_count(html_content)
+        words = word_count(soup)
         if (words < MIN_WORD_LIMIT):
             return []
             
@@ -56,12 +57,12 @@ def extract_next_links(url, resp):
         print(f"Error parsing HTML for {url}: {e}")
         return []
 
-def word_count(html_content):
-    soup = BeautifulSoup(html_content, 'html.parser')
-    for script_or_style in soup(['script', 'style']):
+def word_count(soup):
+    for script_or_style in soup(['script', 'style', 'noscript', 'meta', 'svg']):
         script_or_style.decompose()
-    text = soup.get_text()
-    return len(text.split())
+    text = soup.get_text(separator=" ", strip=True)
+    tokens = re.findall(r'[a-z0-9]+', text.lower())
+    return len(tokens)
     
 
 def no_follow_meta(soup):
