@@ -74,7 +74,8 @@ def no_follow_meta(soup):
 def tokenizer(url, soup):
     global token_freq
 
-    text_words = (soup.get_text(separator=" ")).split()
+    raw_text: str = soup.get_text(separator=" ")
+
     stop_words = {"a", "about", "above", "after", "again", "against", "all", "am", "an", "and",
     "any", "are", "aren't", "as", "at", "be", "because", "been", "before", "being", 
     "below", "between", "both", "but", "by", "can't", "cannot", "could", "couldn't", 
@@ -95,13 +96,14 @@ def tokenizer(url, soup):
     "why", "why's", "with", "won't", "would", "wouldn't", "you", "you'd", "you'll", 
     "you're", "you've", "your", "yours", "yourself", "yourselves"}
 
-    for i in text_words:
-        i = re.findall(r'\b[a-z0-9]+\b',i.lower()) 
-        if i.isalnum() and i not in stop_words:
-            if i in token_freq:
-                token_freq[i] += 1 
+    tokens = re.findall(r'[a-z0-9]+', raw_text.lower())
+
+    for token in tokens: 
+        if token not in stop_words: 
+            if token in token_freq:
+                token_freq[token] += 1 
             else:
-                token_freq[i] = 1
+                token_freq[token] = 1
 
     
 def is_valid(url):
