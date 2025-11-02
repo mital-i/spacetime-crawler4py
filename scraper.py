@@ -181,4 +181,7 @@ def crawler_end():
     with open("50_most_common.txt", "w") as f1:
         for key, val in sorted_freq[:50]:
             f1.write(f"{key} - {val}\n")
+    
+    with open("max_words.txt", "w") as f2:
+        f2.write(f"{maximum_words_page} - {maximum_words_found}\n")
 
