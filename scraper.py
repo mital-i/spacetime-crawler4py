@@ -5,7 +5,6 @@ from urllib.parse import urlparse, urljoin
 traps = ["isg.ics.uci.edu/events/*", "doku.php", "*/events/*", ".pdf", "ngs.ics", "eppstein/pix", "archive.ics.uci.edu"] 
 
 MIN_WORD_LIMIT = 100 
-MAX_WORD_LIMIT = 250000
 DEFAULT_DELAY = 5 #this seems to be in-built into the code 
 maximum_words_found = 0
 maximum_words_page = None
@@ -32,7 +31,7 @@ def extract_next_links(url, resp):
     try:
         soup = BeautifulSoup(html_content, 'lxml')
         words = word_count(html_content)
-        if (words < MIN_WORD_LIMIT) or (words > MAX_WORD_LIMIT):
+        if (words < MIN_WORD_LIMIT):
             return []
             
         if words > maximum_words_found:
@@ -74,7 +73,7 @@ def no_follow_meta(soup):
 def tokenizer(url, soup):
     global token_freq
 
-    raw_text: str = soup.get_text(separator=" ")
+    raw_text = soup.get_text(separator=" ")
 
     stop_words = {"a", "about", "above", "after", "again", "against", "all", "am", "an", "and",
     "any", "are", "aren't", "as", "at", "be", "because", "been", "before", "being", 
@@ -99,7 +98,7 @@ def tokenizer(url, soup):
     tokens = re.findall(r'[a-z0-9]+', raw_text.lower())
 
     for token in tokens: 
-        if token not in stop_words: 
+        if token not in stop_words and len(token) > 1: 
             if token in token_freq:
                 token_freq[token] += 1 
             else:
@@ -175,11 +174,11 @@ def is_valid(url):
 def crawler_end():
     global token_freq
 
+    sorted_freq = sorted(token_freq.items(), key = lambda item: item[1], reverse = True)
     with open("token.txt", "w") as f:
-        for word, count in token_freq.items():
+        for word, count in sorted_freq:
             f.write(f"{word} - {count}\n")
 
-    sorted_freq = sorted(token_freq.items(), key = lambda item: item[1], reverse = True)
     with open("50_most_common.txt", "w") as f1:
         for key, val in sorted_freq[:50]:
             f1.write(f"{key} - {val}\n")
