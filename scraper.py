@@ -96,7 +96,7 @@ def tokenizer(url, soup):
     "you're", "you've", "your", "yours", "yourself", "yourselves"}
 
     for i in text_words:
-        i = i.lower()
+        i = re.findall(r'\b[a-z0-9]+\b',i.lower()) 
         if i.isalnum() and i not in stop_words:
             if i in token_freq:
                 token_freq[i] += 1 
