@@ -97,7 +97,7 @@ def tokenizer(url, soup):
 
     for i in text_words:
         i = i.lower()
-        if i not in stop_words:
+        if i.isalnum() and i not in stop_words:
             if i in token_freq:
                 token_freq[i] += 1 
             else:
@@ -180,5 +180,5 @@ def crawler_end():
     sorted_freq = sorted(token_freq.items(), key = lambda item: item[1], reverse = True)
     with open("50_most_common.txt", "w") as f1:
         for key, val in sorted_freq[:50]:
-            f.write(f"{key} - {val}")
+            f1.write(f"{key} - {val}\n")
 
