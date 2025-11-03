@@ -2,13 +2,19 @@ from utils import get_logger
 from crawler.frontier import Frontier
 from crawler.worker import Worker
 
+import datetime
 import threading
 
 class SharedState:
     def __init__(self, frontier_factory):
         self.lock = threading.Lock()
         self.frontier = frontier_factory()
-        self.cooldowns = dict()
+        self.cooldowns = {
+            "ics.uci.edu": datetime.datetime.fromtimestamp(0),
+            "cs.uci.edu": datetime.datetime.fromtimestamp(0),
+            "informatics.uci.edu": datetime.datetime.fromtimestamp(0),
+            "stat.uci.edu": datetime.datetime.fromtimestamp(0),
+        }
         self.crawler_ended = False
 
 class Crawler(object):
