@@ -9,11 +9,12 @@ class SharedState:
     def __init__(self, frontier_factory):
         self.lock = threading.Lock()
         self.frontier = frontier_factory()
+
         self.cooldowns = {
-            "ics.uci.edu": datetime.datetime.fromtimestamp(0),
-            "cs.uci.edu": datetime.datetime.fromtimestamp(0),
-            "informatics.uci.edu": datetime.datetime.fromtimestamp(0),
-            "stat.uci.edu": datetime.datetime.fromtimestamp(0),
+            "ics.uci.edu": datetime.datetime.now(datetime.timezone.utc),
+            "cs.uci.edu": datetime.datetime.now(datetime.timezone.utc),
+            "informatics.uci.edu": datetime.datetime.now(datetime.timezone.utc),
+            "stat.uci.edu": datetime.datetime.now(datetime.timezone.utc),
         }
         self.crawler_ended = False
 
