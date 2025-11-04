@@ -22,8 +22,7 @@ def extract_next_links(url, resp):
     try:
         raw_bytes = resp.raw_response.content
         if isinstance(raw_bytes, bytes):
-            #errors: ignore may cause some content to be lost
-            html_content = raw_bytes.decode('utf-8', errors='ignore')
+            html_content = raw_bytes.decode('utf-8')
         else:
             html_content = str(raw_bytes)
     except Exception as e:
@@ -70,7 +69,6 @@ def no_follow_meta(soup):
     if robot and 'nofollow' in robot.get('content', '').lower():
         return robot and 'nofollow' in robot.get('content', '').lower()
 
-    
 def tokenizer(url, soup):
     global token_freq
 
@@ -176,14 +174,14 @@ def crawler_end():
     global token_freq
 
     sorted_freq = sorted(token_freq.items(), key = lambda item: item[1], reverse = True)
-    with open("token.txt", "w") as f:
+    with open("token2.txt", "w") as f:
         for word, count in sorted_freq:
             f.write(f"{word} - {count}\n")
 
-    with open("50_most_common.txt", "w") as f1:
+    with open("50_most_common2.txt", "w") as f1:
         for key, val in sorted_freq[:50]:
             f1.write(f"{key} - {val}\n")
     
-    with open("max_words.txt", "w") as f2:
+    with open("max_words2.txt", "w") as f2:
         f2.write(f"{maximum_words_page} - {maximum_words_found}\n")
 
