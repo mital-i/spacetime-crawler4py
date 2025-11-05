@@ -2,7 +2,7 @@ from bs4 import BeautifulSoup
 import re
 from urllib.parse import urlparse, urljoin
 
-traps = ["isg.ics.uci.edu/events/*", "doku.php", "*/events/*", ".pdf", "ngs.ics", "eppstein/pix", "archive.ics.uci.edu"] 
+traps = ["isg.ics.uci.edu/events/*", "doku.php", "*/events/*", ".pdf", "ngs.ics", "eppstein/pix", "archive.ics.uci.edu", ".txt", "*/randomSmiles100K", "grape.ics.uci.edu/*", "version="] 
 
 MIN_WORD_LIMIT = 100 
 DEFAULT_DELAY = 5 #this seems to be in-built into the code 
@@ -174,14 +174,14 @@ def crawler_end():
     global token_freq
 
     sorted_freq = sorted(token_freq.items(), key = lambda item: item[1], reverse = True)
-    with open("token2.txt", "w") as f:
+    with open("token3.txt", "w") as f:
         for word, count in sorted_freq:
             f.write(f"{word} - {count}\n")
 
-    with open("50_most_common2.txt", "w") as f1:
+    with open("50_most_common3.txt", "w") as f1:
         for key, val in sorted_freq[:50]:
             f1.write(f"{key} - {val}\n")
     
-    with open("max_words2.txt", "w") as f2:
+    with open("max_words3.txt", "w") as f2:
         f2.write(f"{maximum_words_page} - {maximum_words_found}\n")
 
